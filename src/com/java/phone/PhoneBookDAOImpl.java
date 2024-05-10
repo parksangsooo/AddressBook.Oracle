@@ -26,6 +26,7 @@ public class PhoneBookDAOImpl implements PhoneBookDAO {
                         resultSet.getString(3),
                         resultSet.getString(4)));
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -42,23 +43,26 @@ public class PhoneBookDAOImpl implements PhoneBookDAO {
     }
 
     @Override
-    public PhoneBookVO searchPhoneBook(String name) {
+    public List<PhoneBookVO> searchPhoneBook(String name) {
+        List<PhoneBookVO> phoneBookVOList = new ArrayList<>();
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
-        String sqlQuery = "SELECT * FROM PHONE_BOOK WHERE name LIKE ?";
+        String sqlQuery = "SELECT * FROM PHONE_BOOK WHERE name LIKE ? OR name LIKE ? OR name LIKE ?";
 
         try {
             connection = DBConnection.getConnection();
             preparedStatement = connection.prepareStatement(sqlQuery);
             preparedStatement.setString(1, "%" + name + "%");
+            preparedStatement.setString(2, "%" + name);
+            preparedStatement.setString(3,  name + "%");
             resultSet = preparedStatement.executeQuery();
 
-            if (resultSet.next()) {
-                return new PhoneBookVO(resultSet.getInt("id"),
+            while (resultSet.next()) {
+                phoneBookVOList.add(new PhoneBookVO(resultSet.getInt("id"),
                         resultSet.getString("name"),
                         resultSet.getString("hp"),
-                        resultSet.getString("tel"));
+                        resultSet.getString("tel")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -70,7 +74,7 @@ public class PhoneBookDAOImpl implements PhoneBookDAO {
             } catch (Exception e) {
             }
         }
-        return null;
+        return phoneBookVOList;
     }
 
     @Override

@@ -8,10 +8,10 @@ public class PhoneBookMain {
     private static PhoneBookDAO phoneBookDAO = new PhoneBookDAOImpl();
 
     public static void main(String[] args) {
-        try (Scanner sc = new Scanner(System.in)){
+        try (Scanner sc = new Scanner(System.in)) {
             while (true) {
-            	printMenu();
-                System.out.print("메뉴번호: ");
+                printMenu();
+                System.out.print("> 메뉴번호: ");
                 int menu = sc.nextInt();
                 sc.nextLine();
 
@@ -42,22 +42,24 @@ public class PhoneBookMain {
             throw new RuntimeException(e);
         }
     }
-    
+
     private static void printMenu() {
-    	  System.out.println("********************************************");
-          System.out.println("*          전화번호 관리 프로그램          *");
-          System.out.println("********************************************");
-          System.out.println("  1.리스트  2.등록  3.삭제  4.검색  5.종료");
-          System.out.println();
+        System.out.println("********************************************");
+        System.out.println("*          전화번호 관리 프로그램             *");
+        System.out.println("********************************************");
+        System.out.println("  1.리스트  2.등록  3.삭제  4.검색  5.종료");
+        System.out.println();
     }
 
     private static void listPhoneBooks() throws SQLException {
-    	System.out.println("---------------------------------------");
+        System.out.println("-------------------------------------------");
         List<PhoneBookVO> phoneBooks = phoneBookDAO.getList();
+        int count = phoneBooks.size();
         for (PhoneBookVO pb : phoneBooks) {
-            System.out.println(pb.getId() + ". " + pb.getName() + " " + maskNumber(pb.getHp()) + " " + maskNumber(pb.getTel()));
+            System.out.printf("%d. %s %s %s%n", pb.getId(), pb.getName(), maskNumber(pb.getHp()), maskNumber(pb.getTel()));
         }
-       System.out.println();
+        System.out.printf("총 %d명이 등록되어 있습니다.%n", count);
+        System.out.println();
     }
 
     private static void addPhoneBook(Scanner scanner) {
@@ -71,6 +73,7 @@ public class PhoneBookMain {
         PhoneBookVO vo = new PhoneBookVO(name, hp, tel);
         boolean success = phoneBookDAO.insert(vo);
 
+        System.out.println();
         System.out.println("정보 등록이 " + (success ? "성공했어요." : "실패했어요."));
         System.out.println();
     }
@@ -87,13 +90,15 @@ public class PhoneBookMain {
     private static void searchPhoneBook(Scanner scanner) {
         System.out.print("검색할 이름: ");
         String name = scanner.nextLine();
-        PhoneBookVO pb = phoneBookDAO.searchPhoneBook(name);
-        if (pb != null) {
-            System.out.println(pb.getId() + ". " + pb.getName() + " " + maskNumber(pb.getHp()) + " " + maskNumber(pb.getTel()));
-        } else {
+        List<PhoneBookVO> phoneBooks = phoneBookDAO.searchPhoneBook(name);
+        if (phoneBooks.isEmpty()) {
             System.out.println("찾을 수 없습니다.");
-            System.out.println();
+        } else {
+            for (PhoneBookVO pb : phoneBooks) {
+                System.out.printf("%d. %s %s %s%n", pb.getId(), pb.getName(), maskNumber(pb.getHp()), maskNumber(pb.getTel()));
+            }
         }
+        System.out.println();
     }
 
     private static String maskNumber(String number) {
